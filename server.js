@@ -10,10 +10,8 @@ const app = express();
 app.use(cors()); // Enables Cross-Origin Resource Sharing (CORS) for frontend-backend communication
 app.use(express.json()); // Allows the server to accept JSON data in requests
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, { 
-    useNewUrlParser: true,  // Keep this option
-})
+// Connect to MongoDB (Remove deprecated options)
+mongoose.connect(process.env.MONGO_URI)
 .then(() => console.log('MongoDB Connected'))
 .catch(err => console.log('MongoDB Connection Error:', err));
 
