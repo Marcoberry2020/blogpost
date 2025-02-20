@@ -19,7 +19,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.log('MongoDB Connection Error:', err));
 
 // Import and Use Routes
-const blogRoutes = require('./routes/blogRoutes'); // Import the blog routes file
+const blogRoutes = require('./routes/BlogRoutes'); // Import the blog routes file
 app.use('/api', blogRoutes); // Use routes under the "/api" prefix
 
 // Define Port and Start Server
