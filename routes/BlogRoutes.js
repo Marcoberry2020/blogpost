@@ -8,11 +8,15 @@ const router = express.Router();
  */
 router.post('/create', async (req, res) => {
     try {
-        const newPost = new Blog(req.body); // Create new post from request body
-        await newPost.save(); // Save post to database
-        res.status(201).json(newPost); // Return newly created post
+        const { title, content, author } = req.body;
+        if (!title || !content || !author) {
+            return res.status(400).json({ error: 'Title, content, and author are required' });
+        }
+        const newPost = new Blog({ title, content, author, comments: [] }); // Initialize comments as an empty array
+        await newPost.save();
+        res.status(201).json(newPost);
     } catch (err) {
-        res.status(500).json({ error: err.message }); // Handle errors
+        res.status(500).json({ error: err.message });
     }
 });
 
@@ -22,8 +26,8 @@ router.post('/create', async (req, res) => {
  */
 router.get('/posts', async (req, res) => {
     try {
-        const posts = await Blog.find(); // Retrieve all posts from DB
-        res.json(posts);
+        const posts = await Blog.find().sort({ createdAt: -1 }); // Get posts sorted by newest first
+        res.status(200).json(posts);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -35,8 +39,11 @@ router.get('/posts', async (req, res) => {
  */
 router.delete('/delete/:id', async (req, res) => {
     try {
-        await Blog.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Post deleted successfully' });
+        const deletedPost = await Blog.findByIdAndDelete(req.params.id);
+        if (!deletedPost) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        res.status(200).json({ message: 'Post deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -48,14 +55,22 @@ router.delete('/delete/:id', async (req, res) => {
  */
 router.post('/comment/:id', async (req, res) => {
     try {
-        const post = await Blog.findById(req.params.id);
-        post.comments.push(req.body); // Add comment to post
-        await post.save(); // Save updated post
-        res.json(post);
+        const { author, text } = req.body;
+        if (!author || !text) {
+            return res.status(400).json({ error: 'Author and text are required' });
+        }
+        const updatedPost = await Blog.findByIdAndUpdate(
+            req.params.id,
+            { $push: { comments: { author, text, date: new Date() } } },
+            { new: true, runValidators: true }
+        );
+        if (!updatedPost) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+        res.status(200).json(updatedPost);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Export Routes
 module.exports = router;

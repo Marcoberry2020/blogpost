@@ -18,6 +18,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Import and Use Routes
 const blogRoutes = require('./routes/BlogRoutes'); // Import the blog routes file
 app.use('/api', blogRoutes); // Use routes under the "/api" prefix
+ 
 
 // Define Port and Start Server
 const PORT = process.env.PORT || 5000; // Use port from .env or default to 5000
