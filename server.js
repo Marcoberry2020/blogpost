@@ -1,38 +1,34 @@
- // Import required dependencies
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config();  
 
 const app = express();
 
-// Middleware Setup
-app.use(cors({ origin: '*' })); // Allows all origins for CORS
-app.use(express.json()); // Enables JSON request body parsing
-
-// Connect to MongoDB with async/await for better error handling
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('✅ MongoDB Connected');
-    } catch (err) {
-        console.error('❌ MongoDB Connection Error:', err.message);
-        process.exit(1); // Exit the process with an error
-    }
+// CORS Configuration
+const corsOptions = {
+    origin: ['http://localhost:3001', 'https://elias2025.netlify.app'], // Allow frontend URLs
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type']
 };
-connectDB();
+app.use(cors(corsOptions));
+
+app.use(express.json());
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => console.log('MongoDB Connection Error:', err));
 
 // Import and Use Routes
-const blogRoutes = require('./routes/BlogRoutes'); // Import blog routes
-app.use('/api', blogRoutes); // Use routes under the "/api" prefix
+const blogRoutes = require('./routes/BlogRoutes');
+app.use('/api', blogRoutes);
 
-// Default Route (Prevents "Cannot GET /" issue)
+// Default Route for Testing
 app.get('/', (req, res) => {
-    res.send('✅ API is running successfully! 🚀');
+    res.send('Backend is running');
 });
 
-// Define Port and Start Server
+// Start Server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
